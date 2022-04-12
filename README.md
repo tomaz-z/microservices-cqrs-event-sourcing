@@ -21,5 +21,5 @@ High-level diagram explaining how everything is connected:
 
 Run in root directory:
 ```sh
-	make run
+make run
 ```
