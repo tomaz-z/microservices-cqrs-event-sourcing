@@ -1,0 +1,128 @@
+swagger: "2.0"
+info:
+  title: Products
+  description: API for handling products.
+  version: 1.0.0
+basePath: /products
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /{id}:
+    get:
+      tags:
+        - products
+      operationId: Product
+      description: Get product by ID.
+      parameters:
+        - in: path
+          name: id
+          description: Product's ID.
+          required: true
+          type: string
+          format: uuid
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Product'
+        404:
+          description: NotFound
+        500:
+          description: InternalServerError
+    patch:
+      tags:
+        - products
+      operationId: Patch
+      description: Partially update a product.
+      parameters:
+        - in: path
+          name: id
+          description: Products's ID.
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: product
+          description: Product data.
+          required: true
+          schema:
+            $ref: '#/definitions/PatchProduct'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/PatchProduct'
+        400:
+          description: BadRequest
+        500:
+          description: InternalServerError
+  /:
+    get:
+      tags: 
+        - products
+      operationId: Products
+      description: Get all products.
+      responses:
+        200:
+          description: OK
+          schema:
+           $ref: '#/definitions/ProductList'
+        500:
+          description: InternalServerError
+    post:
+      tags: 
+        - products
+      operationId: Add
+      description: Add a product.
+      parameters:
+        - in: body
+          name: product
+          schema:
+            $ref: '#/definitions/Product'
+      responses:
+        201:
+          description: Created
+          schema:
+           $ref: '#/definitions/Product'
+        400:
+          description: BadRequest
+        500:
+          description: InternalServerError
+
+definitions:
+  Product:
+    required:
+      - name
+      - description
+      - quantity
+      - price
+    properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
+      name:
+        type: string
+      description:
+        type: string
+      quantity:
+        type: integer
+        format: int32
+      price:
+        type: number
+        format: double
+  ProductList:
+    type: array
+    items:
+      $ref: '#/definitions/Product'
+  PatchProduct:
+    properties:
+      quantity:
+        type: integer
+        format: int32
+        x-nullable: true

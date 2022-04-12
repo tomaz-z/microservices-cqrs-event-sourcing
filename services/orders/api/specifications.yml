@@ -1,0 +1,81 @@
+swagger: "2.0"
+info:
+  title: Orders
+  description: API for handling products.
+  version: 1.0.0
+basePath: /orders
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /{id}:
+    get:
+      tags:
+        - orders
+      operationId: Order
+      description: Get order by ID.
+      parameters:
+        - in: path
+          name: id
+          description: Order's ID.
+          required: true
+          type: string
+          format: uuid
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Order'
+        404:
+          description: NotFound
+        500:
+          description: InternalServerError
+  /:
+    post:
+      tags: 
+        - orders
+      operationId: Create
+      description: Create an order.
+      parameters:
+        - in: body
+          name: order
+          schema:
+            $ref: '#/definitions/Order'
+      responses:
+        201:
+          description: Created
+          schema:
+           $ref: '#/definitions/Order'
+        400:
+          description: BadRequest
+        500:
+          description: InternalServerError
+
+definitions:
+  Order:
+    required:
+      - products
+    properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
+      products:
+        $ref: '#/definitions/ProductList'
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      quantity:
+        type: integer
+        format: int32
+  ProductList:
+    type: array
+    items:
+      $ref: '#/definitions/Product'

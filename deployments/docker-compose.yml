@@ -1,0 +1,124 @@
+version: "3.8"
+
+services:
+  proxy:
+    build: ../build/package/docker/proxy
+    container_name: proxy
+    volumes:
+      - ../config/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+    depends_on:
+      - products
+      - orders
+
+  mq:
+    build: ../build/package/docker/mq
+    container_name: mq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    expose:
+      - "5672"
+    ports:
+      - 15672:15672
+
+  products:
+    build: ../build/package/docker/api
+    container_name: products
+    command: sh ./build/package/scripts/api/init.sh
+    env_file: ../services/products/.env
+    volumes:
+      - ../build/package/scripts/api:/app/build/package/scripts/api
+      - ../go.mod:/app/go.mod
+      - ../go.sum:/app/go.sum
+      - ../vendor:/app/vendor
+      - ../services/products:/app/services/products
+      - ../services/escqrs.go:/app/services/escqrs.go
+      - ../internal:/app/internal
+    expose:
+      - "80"
+
+  orders:
+    build: ../build/package/docker/api
+    container_name: orders
+    command: sh ./build/package/scripts/api/init.sh
+    env_file: ../services/orders/.env
+    volumes:
+      - ../build/package/scripts/api:/app/build/package/scripts/api
+      - ../go.mod:/app/go.mod
+      - ../go.sum:/app/go.sum
+      - ../vendor:/app/vendor
+      - ../services/orders:/app/services/orders
+      - ../services/escqrs.go:/app/services/escqrs.go
+      - ../internal:/app/internal
+    expose:
+      - "80"
+
+  db-products-events:
+    build: ../build/package/docker/db
+    container_name: db-products-events
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+      - 8001:8000
+
+  db-orders-events:
+    build: ../build/package/docker/db
+    container_name: db-orders-events
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+      - 8002:8000
+
+  db-products:
+    build: ../build/package/docker/db
+    container_name: db-products
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+      - 8003:8000
+
+  db-orders:
+    build: ../build/package/docker/db
+    container_name: db-orders
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+      - 8004:8000
+
+  db-events-products-init:
+    build: ../build/package/docker/aws-cli
+    container_name: db-events-products-init
+    entrypoint: sh /app/scripts/db/init.sh
+    env_file: ../.env
+    volumes:
+      - ../build/package/scripts/db/products/events:/app/scripts/db
+    depends_on: 
+      - db-products-events
+
+  db-events-orders-init:
+    build: ../build/package/docker/aws-cli
+    container_name: db-events-orders-init
+    entrypoint: sh /app/scripts/db/init.sh
+    env_file: ../.env
+    volumes:
+      - ../build/package/scripts/db/orders/events:/app/scripts/db
+    depends_on: 
+      - db-orders-events
+
+  db-products-init:
+    build: ../build/package/docker/aws-cli
+    container_name: db-products-init
+    entrypoint: sh /app/scripts/db/init.sh
+    env_file: ../.env
+    volumes:
+      - ../build/package/scripts/db/products/:/app/scripts/db
+    depends_on: 
+      - db-products
+
+  db-orders-init:
+    build: ../build/package/docker/aws-cli
+    container_name: db-orders-init
+    entrypoint: sh /app/scripts/db/init.sh
+    env_file: ../.env
+    volumes:
+      - ../build/package/scripts/db/orders/:/app/scripts/db
+    depends_on: 
+      - db-orders
