@@ -3,6 +3,7 @@
 A simple microservices system for managing orders and products built on the event sourcing and CQRS ideologies.
 
 High-level diagram explaining how everything is connected:
+
 ![overview diagram](./assets/es_cqrs.png)
 
 ## Built with
