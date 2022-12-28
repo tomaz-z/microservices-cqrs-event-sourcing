@@ -1,56 +1,35 @@
-.PHONY: logs run stop test/startup-speed run/% stop/% restart/% swagger/validate/% swagger/remove/% swagger/generate/%
+.PHONY: logs run stop run/% stop/% restart/% swagger/validate/% swagger/remove/% swagger/generate/%
 
 logs:
 	docker-compose \
-		-f ./deployments/docker-compose.yml \
 		-p eventsourcing \
 		logs --follow
 
 run:
 	docker-compose \
-		-f ./deployments/docker-compose.yml \
 		-p eventsourcing \
 		up --detach
 
 stop:
 	docker-compose \
-		-f ../clients/startup-speed/deployments/docker-compose.yml \
 		-p eventsourcing \
-		down --remove-orphans
-
-	docker-compose \
-		-f ./deployments/docker-compose.yml \
-		-p eventsourcing \
-		down --remove-orphans
-
-test/startup-speed:
-	docker-compose \
-		-f ../clients/startup-speed/deployments/docker-compose.yml \
-		-p eventsourcing \
-		up --detach
-
-	docker-compose \
-		-f ./deployments/docker-compose.startup-speed.yml \
-		-p eventsourcing \
-		up --detach
+		down --remove-orphans \
+		-v
 
 run/%:
 	docker-compose \
-		-f ./deployments/docker-compose.yml \
 		-p eventsourcing \
 		up --detach \
 		$*
 
 stop/%:
 	docker-compose \
-		-f ./deployments/docker-compose.yml \
 		-p eventsourcing \
 		stop \
 		$*
 
 restart/%:
 	docker-compose \
-		-f ./deployments/docker-compose.yml \
 		-p eventsourcing \
 		restart \
 		$*
